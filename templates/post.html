@@ -6,6 +6,12 @@
       </a>
     </div>
 
+    <div class="pull-right">
+      <a href="/like/{{p.key().id()}}">
+        Like this
+      </a>
+      {{p.likes|length}}
+    </div>
     <div class="post-date">
       {{p.created.strftime("%b %d, %Y")}}
     </div>

@@ -125,6 +125,8 @@ class Post(db.Model):
     content = db.TextProperty(required = True)
     created = db.DateTimeProperty(auto_now_add = True)
     last_modified = db.DateTimeProperty(auto_now = True)
+    likes = db.StringListProperty()
+    user_id = db.StringProperty()
 
     def render(self):
         self._render_text = self.content.replace('\n', '<br>')
@@ -140,11 +142,13 @@ class PostPage(BlogHandler):
         key = db.Key.from_path('Post', int(post_id), parent=blog_key())
         post = db.get(key)
 
+        uid = self.read_secure_cookie('user_id')
+
         if not post:
             self.error(404)
             return
 
-        self.render("permalink.html", post = post)
+        self.render("permalink.html", post = post, uid = uid)
 
 class NewPost(BlogHandler):
     def get(self):
@@ -160,10 +164,12 @@ class NewPost(BlogHandler):
         subject = self.request.get('subject')
         content = self.request.get('content')
 
+        uid = self.read_secure_cookie('user_id')
+
         if subject and content:
-            p = Post(parent = blog_key(), subject = subject, content = content)
+            p = Post(parent = blog_key(), subject = subject, content = content, user_id = uid)
             p.put()
-            self.redirect('/%s' % str(p.key().id()))
+            self.redirect('/blog/%s' % str(p.key().id()))
         else:
             error = "subject and content, please!"
             self.render("newpost.html", subject=subject, content=content, error=error)
@@ -252,11 +258,37 @@ class Logout(BlogHandler):
         self.logout()
         self.redirect('/')
 
+class LikePage(BlogHandler):
+    def get(self, post_id):
+        key = db.Key.from_path('Post', int(post_id), parent=blog_key())
+        post = db.get(key)
+        uid = self.read_secure_cookie('user_id')
+
+        if not post:
+            self.error(404)
+            return
+
+        if post.user_id != uid:
+            if post.likes and uid in post.likes:
+                post.likes.remove(uid)
+            else:
+                post.likes.append(uid)
+
+            post.put()
+            print(post.likes)
+
+            self.redirect('/blog/%s' % str(post.key().id()))
+
+        else:
+            error = "You can't like your own post"
+            self.render("error.html", error = error)
+
 app = webapp2.WSGIApplication([('/', BlogFront),
                                ('/blog/([0-9]+)', PostPage),
                                ('/blog/newpost', NewPost),
                                ('/signup', Register),
                                ('/login', Login),
                                ('/logout', Logout),
+                               ('/like/([0-9]+)', LikePage),
                                ],
                               debug=True)
