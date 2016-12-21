@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+  {% if error %}
+
+    <div>
+      <p>{{ error }}</p>
+      <br>
+      <a href="javascript:history.back()">Go Back</a>
+    </div>
+
+  {% else %}
+    {% if post %}
+
+      <form method="post">
+        <label>
+          <div>subject</div>
+          <input type="text" name="subject" value="{{post.subject}}">
+        </label>
+        <label>
+          <div>blog</div>
+          <textarea name="content">{{post.content}}</textarea>
+        </label>
+        <div class="error">{{error}}</div>
+        <input type="submit">
+        <a href="/post/{{post.key().id()}}" type="submit">Cancel</a>
+      </form>
+
+    {% endif %}
+  {% endif %}
+{% endblock %}

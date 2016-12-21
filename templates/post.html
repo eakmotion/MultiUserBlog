@@ -7,12 +7,14 @@
     <div class="post">
       <div class="post-heading">
         <div class="post-title">
-          <a href="/blog/{{post.key().id()}}">
-            {{post.subject}}
-          </a>
+          {{post.subject}}
           |
           <a href="/delete/{{post.key().id()}}">
             delete
+          </a>
+           |
+          <a href="/edit/{{post.key().id()}}">
+            edit
           </a>
         </div>
 
@@ -33,7 +35,7 @@
       </div>
 
       <div class="post-content">
-        {{post._render_text | safe}}
+        {{post.render_text() | safe}}
       </div>
     </div>
 

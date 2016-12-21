@@ -130,6 +130,9 @@ class Post(db.Model):
     user_id = db.StringProperty()
     user_name = db.StringProperty()
 
+    def render_text(self):
+        return self.content.replace('\n', '<br>')
+
     def render(self):
         self._render_text = self.content.replace('\n', '<br>')
         return render_str("post.html", p = self)
@@ -303,12 +306,47 @@ class DeletePage(BlogHandler):
         uid = self.read_secure_cookie('user_id')
 
         if post.user_id != uid:
-            error = "You don't have permission to delete this"
+            error = "You don't have permission to delete this post"
         else:
             error = ''
             db.delete(key)
 
         self.render("delete.html", error = error)
+
+class EditPage(BlogHandler):
+    def get(self, post_id):
+        key = db.Key.from_path('Post', int(post_id), parent=blog_key())
+        post = db.get(key)
+
+        if not post:
+            self.error(404)
+            return
+        uid = self.read_secure_cookie('user_id')
+
+        if post.user_id != uid:
+            error = "You don't have permission to edit this post"
+        else:
+            error = ""
+
+        self.render("edit.html", post = post, uid = uid, error = error)
+
+    def post(self, post_id):
+        key = db.Key.from_path('Post', int(post_id), parent=blog_key())
+        post = db.get(key)
+
+        uid = self.read_secure_cookie('user_id')
+
+        subject = self.request.get('subject')
+        content = self.request.get('content')
+
+        if post.user_id == uid and subject and content:
+            post.subject = subject
+            post.content = content
+            post.put()
+            self.redirect('/blog/%s' % str(post.key().id()))
+        else:
+            error = "Subject and content can't be blank"
+            self.render("edit.html", post = post, error = error)
 
 app = webapp2.WSGIApplication([('/', BlogFront),
                                ('/blog/([0-9]+)', PostPage),
@@ -317,6 +355,7 @@ app = webapp2.WSGIApplication([('/', BlogFront),
                                ('/login', Login),
                                ('/logout', Logout),
                                ('/like/([0-9]+)', LikePage),
-                               ('/delete/([0-9]+)', DeletePage)
+                               ('/delete/([0-9]+)', DeletePage),
+                               ('/edit/([0-9]+)', EditPage)
                                ],
                               debug=True)
