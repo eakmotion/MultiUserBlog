@@ -1,34 +1,37 @@
 {% extends "base.html" %}
 
 {% block content %}
+  {% if posts is not none %}
+    {% for p in posts %}
+      <div class="post">
+        <div class="post-heading">
+          <div class="post-title">
+            <a href="/blog/{{p.key().id()}}">
+              {{p.subject}}
+            </a>
+          </div>
 
-  {% for p in posts %}
-    <div class="post">
-      <div class="post-heading">
-        <div class="post-title">
-          <a href="/blog/{{p.key().id()}}">
-            {{p.subject}}
-          </a>
+          <div class="pull-right">
+            {% if (p.likes|length) > 1 %}
+              {{p.likes|length}} Likes
+            {% else %}
+              {{p.likes|length}} Like
+            {% endif %}
+          </div>
+          <div class="post-date">
+            {{p.created.strftime("%b %d, %Y")}}
+          </div>
+          by {{p.user_name}}
         </div>
 
-        <div class="pull-right">
-          {% if (p.likes|length) > 1 %}
-            {{p.likes|length}} Likes
-          {% else %}
-            {{p.likes|length}} Like
-          {% endif %}
+        <div class="post-content">
+          {{p.render_text() | safe}}
         </div>
-        <div class="post-date">
-          {{p.created.strftime("%b %d, %Y")}}
-        </div>
-        by {{p.user_name}}
       </div>
-
-      <div class="post-content">
-        {{p.render_text() | safe}}
-      </div>
-    </div>
-    <br><br>
-  {% endfor %}
+      <br><br>
+    {% endfor %}
+  {% else %}
+    No blog post
+  {% endif %}
 
 {% endblock %}

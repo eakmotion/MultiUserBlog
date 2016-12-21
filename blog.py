@@ -129,6 +129,7 @@ class Post(db.Model):
     likes = db.StringListProperty()
     user_id = db.StringProperty()
     user_name = db.StringProperty()
+    parent_id = db.StringProperty()
 
     def render_text(self):
         return self.content.replace('\n', '<br>')
@@ -139,7 +140,7 @@ class Post(db.Model):
 
 class BlogFront(BlogHandler):
     def get(self):
-        posts = greetings = Post.all().order('-created')
+        posts = greetings = Post.all().filter('parent_id =', None).order('-created')
         self.render('front.html', posts = posts)
 
 class PostPage(BlogHandler):
@@ -154,11 +155,30 @@ class PostPage(BlogHandler):
         else:
             likeStatus = 'like'
 
+        comments = Post.all().filter('parent_id =', post_id).order('-created')
+
         if not post:
             self.error(404)
             return
 
-        self.render("post.html", post = post, uid = uid, likeStatus = likeStatus)
+        self.render("post.html", post = post, uid = uid, likeStatus = likeStatus, comments = comments)
+
+    def post(self, post_id):
+        if not self.user:
+            self.redirect('/')
+
+        subject = self.request.get('subject')
+        content = self.request.get('content')
+        uid = self.read_secure_cookie('user_id')
+        user_name = self.user.name
+
+        if subject and content:
+            post = Post(parent = blog_key(), subject = subject, content = content, user_id = uid, parent_id = post_id, user_name = user_name)
+            post.put()
+            self.redirect('/blog/%s' % post_id)
+        else:
+            error = "Subject and content can't be blank"
+            self.render("post.html", subject = subject, content = content, error = error)
 
 class NewPost(BlogHandler):
     def get(self):
