@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+  {% if error %}
+
+    <div>
+      <p>{{error}}</p>
+      <br>
+      <a href="javascript:history.back()">Go Back</a>
+    </div>
+
+  {% else %}
+
+    <div>
+      <p>Post Deleted</p>
+      <br>
+      <a href="/">Back to home</a>
+    </div>
+
+  {% endif %}
+
+{% endblock %}

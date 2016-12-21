@@ -4,6 +4,7 @@ import random
 import hashlib
 import hmac
 from string import letters
+import pdb # debugger | pdb.set_trace()
 
 import webapp2
 import jinja2
@@ -127,6 +128,7 @@ class Post(db.Model):
     last_modified = db.DateTimeProperty(auto_now = True)
     likes = db.StringListProperty()
     user_id = db.StringProperty()
+    user_name = db.StringProperty()
 
     def render(self):
         self._render_text = self.content.replace('\n', '<br>')
@@ -170,9 +172,10 @@ class NewPost(BlogHandler):
         content = self.request.get('content')
 
         uid = self.read_secure_cookie('user_id')
+        user_name = self.user.name
 
         if subject and content:
-            p = Post(parent = blog_key(), subject = subject, content = content, user_id = uid)
+            p = Post(parent = blog_key(), subject = subject, content = content, user_id = uid, user_name = user_name)
             p.put()
             self.redirect('/blog/%s' % str(p.key().id()))
         else:
@@ -288,6 +291,25 @@ class LikePage(BlogHandler):
             error = "You can't like your own post"
             self.render("error.html", error = error)
 
+class DeletePage(BlogHandler):
+    def get(self, post_id):
+        key = db.Key.from_path('Post', int(post_id), parent=blog_key())
+        post = db.get(key)
+
+        if not post:
+            self.redirect("/")
+            return
+
+        uid = self.read_secure_cookie('user_id')
+
+        if post.user_id != uid:
+            error = "You don't have permission to delete this"
+        else:
+            error = ''
+            db.delete(key)
+
+        self.render("delete.html", error = error)
+
 app = webapp2.WSGIApplication([('/', BlogFront),
                                ('/blog/([0-9]+)', PostPage),
                                ('/blog/newpost', NewPost),
@@ -295,5 +317,6 @@ app = webapp2.WSGIApplication([('/', BlogFront),
                                ('/login', Login),
                                ('/logout', Logout),
                                ('/like/([0-9]+)', LikePage),
+                               ('/delete/([0-9]+)', DeletePage)
                                ],
                               debug=True)

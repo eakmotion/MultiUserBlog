@@ -10,6 +10,10 @@
           <a href="/blog/{{post.key().id()}}">
             {{post.subject}}
           </a>
+          |
+          <a href="/delete/{{post.key().id()}}">
+            delete
+          </a>
         </div>
 
         <div class="pull-right">
@@ -25,6 +29,7 @@
         <div class="post-date">
           {{post.created.strftime("%b %d, %Y")}}
         </div>
+        by {{post.user_name}}
       </div>
 
       <div class="post-content">
