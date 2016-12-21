@@ -1,23 +1,37 @@
-<div class="post">
-  <div class="post-heading">
-    <div class="post-title">
-      <a href="/blog/{{p.key().id()}}">
-        {{p.subject}}
-      </a>
+{% extends "base.html" %}
+
+{% block content %}
+
+  {% if post %}
+
+    <div class="post">
+      <div class="post-heading">
+        <div class="post-title">
+          <a href="/blog/{{post.key().id()}}">
+            {{post.subject}}
+          </a>
+        </div>
+
+        <div class="pull-right">
+          <a href="/like/{{post.key().id()}}">
+            {{likeStatus}}
+          </a>
+          {% if (post.likes|length) > 1 %}
+            {{post.likes|length}} Likes
+          {% else %}
+            {{post.likes|length}} Like
+          {% endif %}
+        </div>
+        <div class="post-date">
+          {{post.created.strftime("%b %d, %Y")}}
+        </div>
+      </div>
+
+      <div class="post-content">
+        {{post._render_text | safe}}
+      </div>
     </div>
 
-    <div class="pull-right">
-      <a href="/like/{{p.key().id()}}">
-        Like this
-      </a>
-      {{p.likes|length}}
-    </div>
-    <div class="post-date">
-      {{p.created.strftime("%b %d, %Y")}}
-    </div>
-  </div>
+  {% endif %}
 
-  <div class="post-content">
-    {{p._render_text | safe}}
-  </div>
-</div>
+{% endblock %}

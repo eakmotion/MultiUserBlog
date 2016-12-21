@@ -144,11 +144,16 @@ class PostPage(BlogHandler):
 
         uid = self.read_secure_cookie('user_id')
 
+        if post.likes and uid in post.likes:
+            likeStatus = 'unlike'
+        else:
+            likeStatus = 'like'
+
         if not post:
             self.error(404)
             return
 
-        self.render("permalink.html", post = post, uid = uid)
+        self.render("post.html", post = post, uid = uid, likeStatus = likeStatus)
 
 class NewPost(BlogHandler):
     def get(self):

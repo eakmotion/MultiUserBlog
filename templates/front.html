@@ -3,7 +3,30 @@
 {% block content %}
 
   {% for p in posts %}
-    {{ p.render() | safe }}
+    <div class="post">
+      <div class="post-heading">
+        <div class="post-title">
+          <a href="/blog/{{p.key().id()}}">
+            {{p.subject}}
+          </a>
+        </div>
+
+        <div class="pull-right">
+          {% if (p.likes|length) > 1 %}
+            {{p.likes|length}} Likes
+          {% else %}
+            {{p.likes|length}} Like
+          {% endif %}
+        </div>
+        <div class="post-date">
+          {{p.created.strftime("%b %d, %Y")}}
+        </div>
+      </div>
+
+      <div class="post-content">
+        {{p._render_text | safe}}
+      </div>
+    </div>
     <br><br>
   {% endfor %}
 
