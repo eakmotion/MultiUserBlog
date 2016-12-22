@@ -8,85 +8,119 @@
       <div class="post-heading">
         <div class="post-title">
           {{post.subject}}
-          |
-          <a href="/delete/{{post.key().id()}}">
-            delete
-          </a>
-           |
-          <a href="/edit/{{post.key().id()}}">
-            edit
-          </a>
-        </div>
-
-        <div class="pull-right">
-          <a href="/like/{{post.key().id()}}">
-            {{likeStatus}}
-          </a>
-          {% if (post.likes|length) > 1 %}
-            {{post.likes|length}} Likes
-          {% else %}
-            {{post.likes|length}} Like
+          {% if post.user_id == uid %}
+            |
+            <a href="/delete/{{post.key().id()}}">
+              delete
+            </a>
+             |
+            <a href="/edit/{{post.key().id()}}">
+              edit
+            </a>
           {% endif %}
         </div>
-        <div class="post-date">
-          {{post.created.strftime("%b %d, %Y")}}
-        </div>
-        by {{post.user_name}}
       </div>
 
       <div class="post-content">
         {{post.render_text() | safe}}
       </div>
+      <div class="like-post text-xs-center">
+        <a href="/like/{{post.key().id()}}">
+          <button type="button" class="btn btn-secondary">
+            <i class="fa fa-heart"></i> {{likeStatus}} this post
+          </button>
+        </a>
+      </div>
+    </div>
+
+    <div class="post-credit">
+        <i class="fa fa-heart"></i>
+        {% if (post.likes|length) > 1 %}
+          {{post.likes|length}} Likes
+        {% else %}
+          {{post.likes|length}} Like
+        {% endif %}
+        |
+        <i class="fa fa-user"></i> by {{post.user_name}}
+        | <i class="fa fa-clock-o"></i> {{post.created.strftime("%b %d, %Y")}}
+      </p>
     </div>
 
     {% if uid %}
-
-      <h2>Add a comment:</h2>
-      <form method="post">
-          <label>Subject</label>
-          <input type="text" name="subject" value={{subject}}>
-          <label>Content</label>
-          <textarea name="content" rows="3">{{content}}</textarea>
+    <div class="row post-comment-wrapper">
+      <div class="col-md-6">
+        <h4>Add a comment:</h4>
         {% if error %}
           <div class="alert alert-danger">
             {{error}}
           </div>
         {% endif %}
-        <button type="submit">Submit</button>
-      </form>
-      <br>
-
-    {% endif %}
-
-    {% for comment in comments %}
-
-      <div class="row">
-        <div class="col-xs-12 col-md-8 col-md-offset-2">
-
-          <div class="panel panel-default">
-            <div class="panel-heading">
-              <h3 class="panel-title">
-                {{comment.subject}}
-                |
-                <a href="/delete/{{comment.key().id()}}">
-                  delete
-                </a>
-                 |
-                <a href="/edit/{{comment.key().id()}}">
-                  edit
-                </a>
-                |
-                by {{comment.user_name}}
-              </h3>
+            <div class="post-comment">
+              <form method="post">
+                <input type="text" name="subject" placeholder="Subject"
+                  value="{{subject}}" required>
+                <textarea name="content" placeholder="Comment on this post"
+                  required="">
+                  {{content}}
+                </textarea>
+                <button type="submit" class="btn btn-success green">
+                  <i class="fa fa-share"></i> Comment
+                </button>
+              </form>
             </div>
-            <div class="panel-body">
-              {{comment.content}}
-            </div>
-          </div>
         </div>
       </div>
 
-    {% endfor %}
+    {% endif %}
+
+    <h4>Comments</h4>
+    <hr>
+
+    {% if comments.count() != 0 %}
+      {% for comment in comments %}
+        <div id="comment-list" class="row">
+          <div class="col-sm-1">
+            <img class="img-thumbnail" src="/img/avatar.png">
+          </div>
+
+          <div class="col-sm-11">
+            <div class="card card-block">
+              <div class="card-heading">
+                <div class="comment-user row">
+                  <div class="col-sm-8">
+                    <i class="fa fa-user"></i>
+                    <strong> {{comment.user_name}}</strong> |
+                      <i class="fa fa-clock-o"></i>
+                      {{comment.created.strftime("%b %d, %Y")}}
+                  </div>
+                  <div class="col-sm-4 text-xs-right">
+                    {% if comment.user_id == uid %}
+                      <a href="/delete/{{comment.key().id()}}">
+                        delete
+                      </a>
+                       |
+                      <a href="/edit/{{comment.key().id()}}">
+                        edit
+                      </a>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+              <div class="card-body">
+                {{comment.subject}}
+                <br>
+                {{comment.content}}
+              </div>
+            </div>
+          </div>
+        </div>
+
+      {% endfor %}
+    {% else %}
+      No comment
+    {% endif %}
+
+  </div>
 
   {% endif %}
 

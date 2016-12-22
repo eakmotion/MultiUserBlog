@@ -5,16 +5,18 @@
   {% if error %}
 
     <div>
-      <p>{{error}}</p>
-      <br>
+      <div class="alert alert-danger" role="alert">
+        {{error}}
+      </div>
       <a href="javascript:history.back()">Go Back</a>
     </div>
 
   {% else %}
 
     <div>
-      <p>Post Deleted</p>
-      <br>
+      <div class="alert alert-success" role="alert">
+        Post Deleted
+      </div>
       <a href="/">Back to home</a>
     </div>
 

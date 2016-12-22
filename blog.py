@@ -4,8 +4,6 @@ import random
 import hashlib
 import hmac
 from string import letters
-import pdb # debugger | pdb.set_trace()
-
 import webapp2
 import jinja2
 
@@ -151,9 +149,9 @@ class PostPage(BlogHandler):
         uid = self.read_secure_cookie('user_id')
 
         if post.likes and uid in post.likes:
-            likeStatus = 'unlike'
+            likeStatus = 'Unlike'
         else:
-            likeStatus = 'like'
+            likeStatus = 'Like'
 
         comments = Post.all().filter('parent_id =', post_id).order('-created')
 
@@ -161,7 +159,8 @@ class PostPage(BlogHandler):
             self.error(404)
             return
 
-        self.render("post.html", post = post, uid = uid, likeStatus = likeStatus, comments = comments)
+        self.render("post.html", post = post, uid = uid,
+            likeStatus = likeStatus, comments = comments)
 
     def post(self, post_id):
         if not self.user:
@@ -173,12 +172,15 @@ class PostPage(BlogHandler):
         user_name = self.user.name
 
         if subject and content:
-            post = Post(parent = blog_key(), subject = subject, content = content, user_id = uid, parent_id = post_id, user_name = user_name)
+            post = Post(parent = blog_key(), subject = subject,
+                   content = content, user_id = uid, parent_id = post_id,
+                   user_name = user_name)
             post.put()
             self.redirect('/blog/%s' % post_id)
         else:
             error = "Subject and content can't be blank"
-            self.render("post.html", subject = subject, content = content, error = error)
+            self.render("post.html", subject = subject, content = content,
+                error = error)
 
 class NewPost(BlogHandler):
     def get(self):
@@ -198,12 +200,14 @@ class NewPost(BlogHandler):
         user_name = self.user.name
 
         if subject and content:
-            p = Post(parent = blog_key(), subject = subject, content = content, user_id = uid, user_name = user_name)
+            p = Post(parent = blog_key(), subject = subject, content = content,
+                user_id = uid, user_name = user_name)
             p.put()
             self.redirect('/blog/%s' % str(p.key().id()))
         else:
-            error = "subject and content, please!"
-            self.render("newpost.html", subject=subject, content=content, error=error)
+            error = "subject and content can't be blank"
+            self.render("newpost.html", subject=subject, content=content,
+                error=error)
 
 USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
 def valid_username(username):
