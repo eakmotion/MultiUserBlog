@@ -156,8 +156,7 @@ class PostPage(BlogHandler):
         comments = Post.all().filter('parent_id =', post_id).order('-created')
 
         if not post:
-            self.error(404)
-            return
+            self.render("404.html")
 
         self.render("post.html", post = post, uid = uid,
             likeStatus = likeStatus, comments = comments)
@@ -302,21 +301,18 @@ class LikePage(BlogHandler):
         uid = self.read_secure_cookie('user_id')
 
         if not post:
-            self.error(404)
-            return
+            self.render("404.html")
 
         if not self.user:
             self.render("login-form.html",
                         alert = "Please login to like the post")
+
         elif post.user_id != uid:
             if post.likes and uid in post.likes:
                 post.likes.remove(uid)
             else:
                 post.likes.append(uid)
-
             post.put()
-            print(post.likes)
-
             self.redirect('/blog/%s' % str(post.key().id()))
 
         else:
@@ -348,8 +344,8 @@ class EditPage(BlogHandler):
         post = db.get(key)
 
         if not post:
-            self.error(404)
-            return
+            self.render("404.html")
+
         uid = self.read_secure_cookie('user_id')
 
         if post.user_id != uid:
