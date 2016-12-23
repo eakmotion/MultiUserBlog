@@ -164,7 +164,8 @@ class PostPage(BlogHandler):
 
     def post(self, post_id):
         if not self.user:
-            self.redirect('/')
+            self.render("login-form.html",
+                        alert = "Please login to comment")
 
         subject = self.request.get('subject')
         content = self.request.get('content')
@@ -191,7 +192,8 @@ class NewPost(BlogHandler):
 
     def post(self):
         if not self.user:
-            self.redirect('/')
+            self.render("login-form.html",
+                        alert = "Please login to create a new post")
 
         subject = self.request.get('subject')
         content = self.request.get('content')
@@ -303,7 +305,10 @@ class LikePage(BlogHandler):
             self.error(404)
             return
 
-        if post.user_id != uid:
+        if not self.user:
+            self.render("login-form.html",
+                        alert = "Please login to like the post")
+        elif post.user_id != uid:
             if post.likes and uid in post.likes:
                 post.likes.remove(uid)
             else:

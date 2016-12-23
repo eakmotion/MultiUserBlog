@@ -1,7 +1,11 @@
 {% extends "base.html" %}
 
 {% block content %}
-
+  {% if alert %}
+    <div class="alert alert-info" role="alert">
+      {{alert}}
+    </div>
+  {% endif %}
   <form class="form-signin" method="post">
     <h2 class="form-signin-heading">Please login</h2>
     <label for="inputUsername" class="sr-only">Username</label>
