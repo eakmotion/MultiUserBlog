@@ -13,8 +13,9 @@ template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
                                autoescape = True)
 
-secret = 'eakmotion'
+secret = 'r8YNrsoLRmWk74ACtvv0cffqcREqkTNv'
 
+# Jinja2 template base methods
 def render_str(template, **params):
     t = jinja_env.get_template(template)
     return t.render(params)
@@ -63,12 +64,7 @@ def render_post(response, post):
     response.out.write('<b>' + post.subject + '</b><br>')
     response.out.write(post.content)
 
-class MainPage(BlogHandler):
-  def get(self):
-      self.write('Hello, Udacity!')
-
-
-##### user stuff
+# User base methods
 def make_salt(length = 5):
     return ''.join(random.choice(letters) for x in xrange(length))
 
@@ -85,6 +81,7 @@ def valid_pw(name, password, h):
 def users_key(group = 'default'):
     return db.Key.from_path('users', group)
 
+# User model
 class User(db.Model):
     name = db.StringProperty(required = True)
     pw_hash = db.StringProperty(required = True)
@@ -113,12 +110,11 @@ class User(db.Model):
         if u and valid_pw(name, pw, u.pw_hash):
             return u
 
-
-##### blog stuff
-
+# Blog base method
 def blog_key(name = 'default'):
     return db.Key.from_path('blogs', name)
 
+# Post model
 class Post(db.Model):
     subject = db.StringProperty(required = True)
     content = db.TextProperty(required = True)
@@ -202,7 +198,7 @@ class NewPost(BlogHandler):
 
         if subject and content:
             p = Post(parent = blog_key(), subject = subject, content = content,
-                user_id = uid, user_name = user_name)
+                     user_id = uid, user_name = user_name)
             p.put()
             self.redirect('/blog/%s' % str(p.key().id()))
         else:
@@ -210,6 +206,7 @@ class NewPost(BlogHandler):
             self.render("newpost.html", subject=subject, content=content,
                 error=error)
 
+# regex functions for User validation
 USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
 def valid_username(username):
     return username and USER_RE.match(username)
@@ -261,7 +258,7 @@ class Signup(BlogHandler):
 
 class Register(Signup):
     def done(self):
-        #make sure the user doesn't already exist
+        # make sure the user doesn't already exist
         u = User.by_name(self.username)
         if u:
             msg = 'That user already exists.'
