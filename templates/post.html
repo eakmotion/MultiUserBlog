@@ -109,7 +109,7 @@
               <div class="card-body">
                 {{comment.subject}}
                 <br>
-                {{comment.content}}
+                {{comment.render_text() | safe}}
               </div>
             </div>
           </div>
