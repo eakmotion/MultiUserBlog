@@ -50,24 +50,15 @@
     <div class="row post-comment-wrapper">
       <div class="col-md-6">
         <h4>Add a comment:</h4>
-        {% if error %}
-          <div class="alert alert-danger">
-            {{error}}
+          <div class="post-comment">
+            <form method="post">
+              <textarea name="content"
+                placeholder="Comment on this post" required></textarea>
+              <button type="submit" class="btn btn-success green">
+                <i class="fa fa-share"></i> Comment
+              </button>
+            </form>
           </div>
-        {% endif %}
-            <div class="post-comment">
-              <form method="post">
-                <input type="text" name="subject" placeholder="Subject"
-                  value="{{subject}}" required>
-                <textarea name="content" placeholder="Comment on this post"
-                  required="">
-                  {{content}}
-                </textarea>
-                <button type="submit" class="btn btn-success green">
-                  <i class="fa fa-share"></i> Comment
-                </button>
-              </form>
-            </div>
         </div>
       </div>
 
@@ -95,11 +86,11 @@
                   </div>
                   <div class="col-sm-4 text-xs-right">
                     {% if comment.user_id == uid %}
-                      <a href="/delete/{{comment.key().id()}}">
+                      <a href="/delete-comment/{{comment.key().id()}}">
                         delete
                       </a>
                        |
-                      <a href="/edit/{{comment.key().id()}}">
+                      <a href="/edit-comment/{{comment.key().id()}}">
                         edit
                       </a>
                     {% endif %}
@@ -107,8 +98,6 @@
                 </div>
               </div>
               <div class="card-body">
-                {{comment.subject}}
-                <br>
                 {{comment.render_text() | safe}}
               </div>
             </div>

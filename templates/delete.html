@@ -14,10 +14,17 @@
   {% else %}
 
     <div>
-      <div class="alert alert-success" role="alert">
-        Post Deleted
-      </div>
-      <a href="/">Back to home</a>
+      {% if parent_id %}
+        <div class="alert alert-success" role="alert">
+          Comment deleted
+        </div>
+        <a href="/blog/{{parent_id}}">Back to post</a>
+      {% else %}
+        <div class="alert alert-success" role="alert">
+          Post deleted
+        </div>
+        <a href="/">Back to home</a>
+      {% endif %}
     </div>
 
   {% endif %}

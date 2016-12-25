@@ -5,6 +5,7 @@ import webapp2
 import jinja2
 from user import User
 from post import Post
+from comment import Comment
 
 from google.appengine.ext import db
 
@@ -84,7 +85,7 @@ class PostPage(BlogHandler):
         else:
             likeStatus = 'Like'
 
-        comments = Post.all().filter('parent_id =', post_id).order('-created')
+        comments = Comment.all().filter('parent_id =', post_id).order('-created')
 
         if not post:
             self.render("404.html")
@@ -97,20 +98,19 @@ class PostPage(BlogHandler):
             self.render("login-form.html",
                         alert = "Please login to comment")
 
-        subject = self.request.get('subject')
         content = self.request.get('content')
         uid = self.read_secure_cookie('user_id')
         user_name = self.user.name
 
-        if subject and content:
-            post = Post(parent = blog_key(), subject = subject,
+        if content:
+            post = Comment(parent = blog_key(),
                    content = content, user_id = uid, parent_id = post_id,
                    user_name = user_name)
             post.put()
             self.redirect('/blog/%s' % post_id)
         else:
             error = "Subject and content can't be blank"
-            self.render("post.html", subject = subject, content = content,
+            self.render("post.html", content = content,
                 error = error)
 
 class NewPost(BlogHandler):
@@ -257,8 +257,7 @@ class DeletePage(BlogHandler):
         post = db.get(key)
 
         if not post:
-            self.redirect("/")
-            return
+            self.render("404.html")
 
         uid = self.read_secure_cookie('user_id')
 
@@ -269,6 +268,24 @@ class DeletePage(BlogHandler):
             db.delete(key)
 
         self.render("delete.html", error = error)
+
+class DeleteComment(BlogHandler):
+    def get(self, comment_id):
+        key = db.Key.from_path('Comment', int(comment_id), parent=blog_key())
+        comment = db.get(key)
+
+        if not comment:
+            self.render("404.html")
+
+        uid = self.read_secure_cookie('user_id')
+
+        if comment.user_id != uid:
+            error = "You don't have permission to delete this comment"
+        else:
+            error = ''
+            db.delete(key)
+
+        self.render("delete.html", error = error, parent_id = comment.parent_id)
 
 class EditPage(BlogHandler):
     def get(self, post_id):
@@ -305,6 +322,39 @@ class EditPage(BlogHandler):
             error = "Subject and content can't be blank"
             self.render("edit.html", post = post, error = error)
 
+class EditComment(BlogHandler):
+    def get(self, comment_id):
+        key = db.Key.from_path('Comment', int(comment_id), parent=blog_key())
+        comment = db.get(key)
+
+        if not comment:
+            self.render("404.html")
+
+        uid = self.read_secure_cookie('user_id')
+
+        if comment.user_id != uid:
+            error = "You don't have permission to edit this comment"
+        else:
+            error = ""
+
+        self.render("edit.html", comment = comment, uid = uid, error = error)
+
+    def post(self, comment_id):
+        key = db.Key.from_path('Comment', int(comment_id), parent=blog_key())
+        comment = db.get(key)
+
+        uid = self.read_secure_cookie('user_id')
+
+        content = self.request.get('content')
+
+        if comment.user_id == uid and content:
+            comment.content = content
+            comment.put()
+            self.redirect('/blog/%s' % str(comment.parent_id))
+        else:
+            error = "Content can't be blank"
+            self.render("edit.html", comment = comment, error = error)
+
 app = webapp2.WSGIApplication([('/', BlogFront),
                                ('/blog/([0-9]+)', PostPage),
                                ('/blog/newpost', NewPost),
@@ -313,6 +363,8 @@ app = webapp2.WSGIApplication([('/', BlogFront),
                                ('/logout', Logout),
                                ('/like/([0-9]+)', LikePage),
                                ('/delete/([0-9]+)', DeletePage),
-                               ('/edit/([0-9]+)', EditPage)
+                               ('/delete-comment/([0-9]+)', DeleteComment),
+                               ('/edit/([0-9]+)', EditPage),
+                               ('/edit-comment/([0-9]+)', EditComment)
                                ],
                               debug=True)
